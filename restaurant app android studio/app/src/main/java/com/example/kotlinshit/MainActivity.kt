@@ -8,6 +8,8 @@ import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.drawerlayout.widget.DrawerLayout
 import com.google.android.material.navigation.NavigationView
+import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.example.kotlinshit.ui.customer.BottomSheetCart
 
 class MainActivity : AppCompatActivity() {
     private val foodMenu = listOf("Pizza", "Burger", "Sushi", "Pasta", "Salad")
@@ -17,6 +19,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        val fabCart = findViewById<FloatingActionButton>(R.id.fabCart)
         val drawerLayout = findViewById<DrawerLayout>(R.id.drawerLayout)
         val navigationView = findViewById<NavigationView>(R.id.navigationView)
         val toolbar = findViewById<androidx.appcompat.widget.Toolbar>(R.id.toolbar)
@@ -44,18 +47,12 @@ class MainActivity : AppCompatActivity() {
         }
 
         val listViewMenu = findViewById<ListView>(R.id.listViewMenu)
-        val buttonCart = findViewById<Button>(R.id.buttonCart)
 
         val adapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, foodMenu)
         listViewMenu.adapter = adapter
 
-        listViewMenu.setOnItemClickListener { _, _, position, _ ->
-            cart.add(foodMenu[position])
-            buttonCart.text = "Cart (${cart.size})"
-        }
-
-        buttonCart.setOnClickListener {
-            Toast.makeText(this, "Cart: ${cart.joinToString()}", Toast.LENGTH_SHORT).show()
+        fabCart.setOnClickListener {
+            BottomSheetCart.show(this, cart)
         }
     }
 }
