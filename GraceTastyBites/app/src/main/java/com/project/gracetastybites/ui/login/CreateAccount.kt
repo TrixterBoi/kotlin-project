@@ -12,6 +12,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 
+private fun isEmailValid(email: String): Boolean {
+    val atIndex = email.indexOf('@')
+    val dotIndex = email.lastIndexOf('.')
+    return atIndex > 0 && dotIndex > atIndex + 1 && dotIndex < email.length - 1
+}
+
 private fun isPasswordValid(password: String): Boolean {
     val regex = Regex("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[!@#\$%^&*()_+\\-={}:;\"'|<>,.?/~`]).{8,}\$")
     return regex.matches(password)
@@ -28,8 +34,11 @@ fun CreateAccountScreen(
     var password by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
 
+    val emailValid = isEmailValid(email)
     val passwordValid = isPasswordValid(password)
     val passwordsMatch = password == confirmPassword
+    val allFieldsFilled = firstName.isNotBlank() && secondName.isNotBlank() && email.isNotBlank() && password.isNotBlank() && confirmPassword.isNotBlank()
+    val canCreateAccount = allFieldsFilled && emailValid && passwordValid && passwordsMatch
 
     Box(
         modifier = Modifier
@@ -65,6 +74,16 @@ fun CreateAccountScreen(
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth()
             )
+            if (email.isNotEmpty() && !emailValid) {
+                Text(
+                    "Please enter a valid email address.",
+                    color = Color.Red,
+                    style = MaterialTheme.typography.bodySmall,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 4.dp)
+                )
+            }
             Spacer(Modifier.height(12.dp))
             OutlinedTextField(
                 value = password,
@@ -107,7 +126,7 @@ fun CreateAccountScreen(
             Button(
                 onClick = { onCreateAccountClick(firstName, secondName, email, password) },
                 modifier = Modifier.fillMaxWidth(),
-                enabled = passwordValid && passwordsMatch
+                enabled = canCreateAccount
             ) {
                 Text("Create Account")
             }
