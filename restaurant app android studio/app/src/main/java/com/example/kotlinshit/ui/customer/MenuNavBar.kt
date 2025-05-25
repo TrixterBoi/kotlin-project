@@ -3,9 +3,9 @@ package com.example.kotlinshit
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 
-class CartActivity : AppCompatActivity() {
+class MenuNavBar : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.cart_activity)
+        setContentView(R.layout.menu_nav_bar)
     }
 }
