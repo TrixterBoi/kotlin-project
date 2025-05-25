@@ -1,13 +1,10 @@
-package com.project.gracetastybites.ui.menu
+package com.project.gracetastybites.ui.partials
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.DateRange
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.material3.DrawerState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
@@ -17,7 +14,8 @@ import androidx.compose.ui.unit.dp
 fun NavDrawer(
     drawerItems: List<Triple<String, Any?, String>>,
     onItemClick: (String) -> Unit,
-    onLoginClick: () -> Unit
+    onLoginClick: () -> Unit,
+    drawerState: DrawerState
 ) {
     ModalDrawerSheet {
         Text(
@@ -49,13 +47,15 @@ fun NavDrawer(
             }
         }
         Spacer(modifier = Modifier.weight(1f))
-        Button(
-            onClick = onLoginClick,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
-        ) {
-            Text("Login")
+        if (!drawerState.isOpen) {
+            Button(
+                onClick = onLoginClick,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
+            ) {
+                Text("Login")
+            }
         }
     }
 }
