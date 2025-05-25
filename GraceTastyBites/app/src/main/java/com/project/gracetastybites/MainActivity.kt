@@ -1,4 +1,5 @@
 package com.project.gracetastybites
+
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -58,7 +59,7 @@ fun MainScreen() {
     val cartDrawerState = rememberDrawerState(DrawerValue.Closed)
     val scope = rememberCoroutineScope()
 
-    val foodMenu = listOf("Burger", "Pizza", "Pasta", "Salad", "Sushi")
+    val foodMenu = listOf("Login", "Staff Management", "Payroll", "Menu Management", "Employee Panel")
     var cart by remember { mutableStateOf(listOf<String>()) }
 
     // Left drawer: Navigation only
