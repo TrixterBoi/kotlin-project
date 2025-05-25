@@ -9,25 +9,25 @@ data class StaffDAO(
     val Role: String,
     val Email: String,
     val Password: String,
-    val Wage: String
+    val Wage: Int
 )
 
 fun getStaffList(db: SQLiteDatabase): List<StaffDAO> {
     val staffList = mutableListOf<StaffDAO>()
     val cursor = db.rawQuery(
-        "SELECT id, FirstName, LastName, role, email, password, wage FROM staff",
+        "SELECT Id, FirstName, LastName, Role, Email, Password, Wage FROM StaffMember",
         null
     )
     cursor.use {
         while (it.moveToNext()) {
-            val id = it.getInt(it.getColumnIndexOrThrow("id"))
+            val Id = it.getInt(it.getColumnIndexOrThrow("id"))
             val FirstName = it.getString(it.getColumnIndexOrThrow("FirstName"))
-            val lastname = it.getString(it.getColumnIndexOrThrow("LastName"))
-            val role = it.getString(it.getColumnIndexOrThrow("role"))
-            val email = it.getString(it.getColumnIndexOrThrow("email"))
-            val password = it.getString(it.getColumnIndexOrThrow("password"))
-            val wage = it.getInt(it.getColumnIndexOrThrow("wage")) != 0
-            staffList.add(StaffDAO(id, LastName, lastname, role, email, password, wage))
+            val LastName = it.getString(it.getColumnIndexOrThrow("LastName"))
+            val Role = it.getString(it.getColumnIndexOrThrow("Role"))
+            val Email = it.getString(it.getColumnIndexOrThrow("Email"))
+            val Password = it.getString(it.getColumnIndexOrThrow("Password"))
+            val Wage = it.getInt(it.getColumnIndexOrThrow("Wage"))
+            staffList.add(StaffDAO(Id, FirstName, LastName, Role, Email, Password, Wage))
         }
     }
     return staffList
