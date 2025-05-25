@@ -1,32 +1,51 @@
 package com.project.gracetastybites
-
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.*
-import androidx.compose.material3.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.ShoppingCart
+import androidx.compose.material3.Button
 import androidx.compose.material3.DrawerValue
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalDrawerSheet
+import androidx.compose.material3.ModalNavigationDrawer
+import androidx.compose.material3.Text
 import androidx.compose.material3.rememberDrawerState
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.project.gracetastybites.ui.theme.GraceTastyBitesTheme
 import kotlinx.coroutines.launch
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material.icons.filled.ShoppingCart
-import androidx.compose.foundation.layout.padding
 
-@OptIn(ExperimentalMaterial3Api::class)
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
             GraceTastyBitesTheme {
-                MainScreen()
+                MainScreen() // <-- Add this line to use your composable
             }
         }
     }
@@ -39,30 +58,22 @@ fun MainScreen() {
     val cartDrawerState = rememberDrawerState(DrawerValue.Closed)
     val scope = rememberCoroutineScope()
 
-    val foodMenu = listOf("Login", "Staff Management", "Payroll", "Menu Management", "Employee Panel")
+    val foodMenu = listOf("Burger", "Pizza", "Pasta", "Salad", "Sushi")
     var cart by remember { mutableStateOf(listOf<String>()) }
 
-    // Left drawer: Menu
+    // Left drawer: Navigation only
     ModalNavigationDrawer(
         drawerState = menuDrawerState,
         drawerContent = {
             ModalDrawerSheet {
                 Text("Menu", style = MaterialTheme.typography.titleLarge, modifier = Modifier.padding(16.dp))
-                foodMenu.forEach { item ->
-                    Row(
+                listOf("Login", "Staff Management", "Payroll", "Menu Management", "Employee Panel").forEach { item ->
+                    Text(
+                        item,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = 16.dp, vertical = 8.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(item, modifier = Modifier.weight(1f))
-                        Button(
-                            onClick = { cart = cart + item },
-                            contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp)
-                        ) {
-                            Text("Add")
-                        }
-                    }
+                            .padding(horizontal = 16.dp, vertical = 8.dp)
+                    )
                 }
             }
         }
@@ -110,11 +121,34 @@ fun MainScreen() {
                     Icon(Icons.Default.Menu, contentDescription = "Menu")
                 }
 
-                // Main content
-                Text(
-                    "Welcome! Select items from the menu.",
-                    modifier = Modifier.align(Alignment.Center)
-                )
+                // Main content: Food list with Add buttons
+                Column(
+                    modifier = Modifier
+                        .align(Alignment.Center)
+                        .fillMaxWidth()
+                ) {
+                    Text(
+                        "Welcome! Select items from the food list.",
+                        style = MaterialTheme.typography.titleLarge,
+                        modifier = Modifier.padding(bottom = 16.dp)
+                    )
+                    foodMenu.forEach { item ->
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp, vertical = 8.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(item, modifier = Modifier.weight(1f))
+                            Button(
+                                onClick = { cart = cart + item },
+                                contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp)
+                            ) {
+                                Text("Add")
+                            }
+                        }
+                    }
+                }
 
                 // Cart button at bottom right
                 Button(
@@ -131,5 +165,3 @@ fun MainScreen() {
         }
     }
 }
-
-
