@@ -1,6 +1,7 @@
 package com.project.gracetastybites.data.db
 
 import android.database.sqlite.SQLiteDatabase
+import android.content.ContentValues
 
 data class MenuDAO(
     val Id: Int,
@@ -29,4 +30,29 @@ fun getMenuItems(db: SQLiteDatabase): List<MenuDAO> {
         }
     }
     return menuList
+}
+fun insertMenuItem(db: SQLiteDatabase, menu: MenuDAO): Long {
+    val values = ContentValues().apply {
+        put("Name", menu.Name)
+        put("Category", menu.Category)
+        put("Description", menu.Description)
+        put("Price", menu.Price)
+        put("Available", if (menu.Available) 1 else 0)
+    }
+    return db.insert("MenuItem", null, values)
+}
+
+fun updateMenuItem(db: SQLiteDatabase, menu: MenuDAO): Int {
+    val values = ContentValues().apply {
+        put("Name", menu.Name)
+        put("Category", menu.Category)
+        put("Description", menu.Description)
+        put("Price", menu.Price)
+        put("Available", if (menu.Available) 1 else 0)
+    }
+    return db.update("MenuItem", values, "Id = ?", arrayOf(menu.Id.toString()))
+}
+
+fun deleteMenuItem(db: SQLiteDatabase, id: Int): Int {
+    return db.delete("MenuItem", "Id = ?", arrayOf(id.toString()))
 }

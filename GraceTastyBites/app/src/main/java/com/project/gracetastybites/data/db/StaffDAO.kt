@@ -1,5 +1,6 @@
 package com.project.gracetastybites.data.db
 
+import android.content.ContentValues
 import android.database.sqlite.SQLiteDatabase
 
 data class StaffDAO(
@@ -31,4 +32,53 @@ fun getStaffList(db: SQLiteDatabase): List<StaffDAO> {
         }
     }
     return staffList
+}
+
+fun insertStaff(db: SQLiteDatabase, staff: StaffDAO): Long {
+    val values = ContentValues().apply {
+        put("FirstName", staff.FirstName)
+        put("LastName", staff.LastName)
+        put("Role", staff.Role)
+        put("Email", staff.Email)
+        put("Password", staff.Password)
+        put("Wage", staff.Wage)
+    }
+    return db.insert("StaffMember", null, values)
+}
+
+fun updateStaff(db: SQLiteDatabase, staff: StaffDAO): Int {
+    val values = ContentValues().apply {
+        put("FirstName", staff.FirstName)
+        put("LastName", staff.LastName)
+        put("Role", staff.Role)
+        put("Email", staff.Email)
+        put("Password", staff.Password)
+        put("Wage", staff.Wage)
+    }
+    return db.update("StaffMember", values, "Id = ?", arrayOf(staff.Id.toString()))
+}
+
+fun deleteStaff(db: SQLiteDatabase, id: Int): Int {
+    return db.delete("StaffMember", "Id = ?", arrayOf(id.toString()))
+}
+
+fun authenticateStaff(db: SQLiteDatabase, email: String, password: String): StaffDAO? {
+    val cursor = db.rawQuery(
+        "SELECT Id, FirstName, LastName, Role, Email, Password, Wage FROM StaffMember WHERE Email = ? AND Password = ?",
+        arrayOf(email, password)
+    )
+    cursor.use {
+        if (it.moveToFirst()) {
+            return StaffDAO(
+                it.getInt(it.getColumnIndexOrThrow("Id")),
+                it.getString(it.getColumnIndexOrThrow("FirstName")),
+                it.getString(it.getColumnIndexOrThrow("LastName")),
+                it.getString(it.getColumnIndexOrThrow("Role")),
+                it.getString(it.getColumnIndexOrThrow("Email")),
+                it.getString(it.getColumnIndexOrThrow("Password")),
+                it.getInt(it.getColumnIndexOrThrow("Wage"))
+            )
+        }
+    }
+    return null
 }
