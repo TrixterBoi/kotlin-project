@@ -47,15 +47,5 @@ fun NavDrawer(
             }
         }
         Spacer(modifier = Modifier.weight(1f))
-        if (!drawerState.isOpen) {
-            Button(
-                onClick = onLoginClick,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp)
-            ) {
-                Text("Login")
-            }
-        }
     }
 }

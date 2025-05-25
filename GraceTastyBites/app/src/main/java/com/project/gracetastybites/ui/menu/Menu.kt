@@ -50,7 +50,7 @@ fun MenuScreen(menuDrawerState: DrawerState) {
 
     // Drawer items with icons
     val drawerItems = listOf(
-        Triple("Staff Panel", null, "Staff Management"),
+        Triple("Employee Panel", null, "Employee Management"),
         Triple("Admin Panel", null, "Admin Management"),
     )
 
