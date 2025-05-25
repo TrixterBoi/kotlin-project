@@ -1,48 +1,22 @@
 package com.project.gracetastybites.ui.menu
 
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.ShoppingCart
-import androidx.compose.material3.Button
-import androidx.compose.material3.Divider
-import androidx.compose.material3.DrawerState
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.ModalNavigationDrawer
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.rememberModalBottomSheetState
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.sp
-import com.project.gracetastybites.ui.login.CreateAccountScreen
-import com.project.gracetastybites.ui.login.ForgotPasswordScreen
 import com.project.gracetastybites.ui.login.LoginScreen
+import com.project.gracetastybites.ui.login.ForgotPasswordScreen
+import com.project.gracetastybites.ui.login.CreateAccountScreen
 import com.project.gracetastybites.ui.partials.NavDrawer
 import kotlinx.coroutines.launch
 
@@ -71,15 +45,17 @@ fun MenuScreen(menuDrawerState: DrawerState) {
     var showForgotPassword by remember { mutableStateOf(false) }
     var showCreateAccount by remember { mutableStateOf(false) }
 
+    // Favourites state
+    var favourites by remember { mutableStateOf<Set<String>>(emptySet()) }
+
     // Drawer items with icons
     val drawerItems = listOf(
-        Triple("Staff Panel", null, "Staff Panel"),
-        Triple("Admin Panel", null, "Admin Panel")
+        Triple("Staff Panel", null, "Staff Management"),
+        Triple("Admin Panel", null, "Admin Management"),
     )
 
     // Categorized menu data
     val categorizedMenu = mapOf(
-        "Starters" to listOf("Spring Rolls", "Garlic Bread"),
         "Mains" to listOf("Grilled Chicken", "Veggie Burger"),
         "Desserts" to listOf("Cheesecake", "Ice Cream"),
         "Drinks" to listOf("Cola", "Orange Juice")
@@ -87,8 +63,6 @@ fun MenuScreen(menuDrawerState: DrawerState) {
 
     // Details for each menu item
     val menuDetails = mapOf(
-        "Spring Rolls" to MenuItemDetail("Spring Rolls", "Crispy rolls stuffed with veggies.", 180, 3.99),
-        "Garlic Bread" to MenuItemDetail("Garlic Bread", "Toasted bread with garlic butter.", 220, 2.99),
         "Grilled Chicken" to MenuItemDetail("Grilled Chicken", "Juicy grilled chicken breast.", 350, 7.99),
         "Veggie Burger" to MenuItemDetail("Veggie Burger", "Burger with a plant-based patty.", 320, 6.99),
         "Cheesecake" to MenuItemDetail("Cheesecake", "Classic creamy cheesecake.", 400, 4.99),
@@ -116,10 +90,15 @@ fun MenuScreen(menuDrawerState: DrawerState) {
         Scaffold(
             topBar = {
                 TopAppBar(
-                    title = { Text("GraceTastyBites") },
+                    title = { Text("Menu") },
                     navigationIcon = {
                         IconButton(onClick = { scope.launch { menuDrawerState.open() } }) {
-                            Icon(Icons.Default.Menu, contentDescription = "Menu")
+                            Icon(Icons.Default.Menu, contentDescription = "Open Drawer")
+                        }
+                    },
+                    actions = {
+                        IconButton(onClick = { showCart = true }) {
+                            Icon(Icons.Default.ShoppingCart, contentDescription = "Cart")
                         }
                     }
                 )
@@ -127,122 +106,82 @@ fun MenuScreen(menuDrawerState: DrawerState) {
         ) { innerPadding ->
             Box(
                 modifier = Modifier
-                    .padding(innerPadding)
                     .fillMaxSize()
+                    .padding(innerPadding)
             ) {
-                when {
-                    showLogin -> {
-                        LoginScreen(
-                            onLoginSuccess = { showLogin = false },
-                            onForgotPasswordClick = {
-                                showLogin = false
-                                showForgotPassword = true
-                            },
-                            onCreateAccountClick = {
-                                showLogin = false
-                                showCreateAccount = true
-                            }
-                        )
-                    }
-                    showForgotPassword -> {
-                        ForgotPasswordScreen(
-                            onSubmit = { showForgotPassword = false }
-                        )
-                    }
-                    showCreateAccount -> {
-                        CreateAccountScreen(
-                            onCreateAccountClick = { _, _, _, _ -> showCreateAccount = false },
-                            onAlreadyCustomerClick = {
-                                showCreateAccount = false
-                                showLogin = true
-                            }
-                        )
-                    }
-                    else -> {
-                        // Main content: Categorized food list with clickable items
-                        Column(
-                            modifier = Modifier
-                                .align(Alignment.TopCenter)
-                                .fillMaxWidth()
-                                .padding(vertical = 10.dp, horizontal = 24.dp)
-                        ) {
-                            categorizedMenu.forEach { (category, items) ->
-                                Text(
-                                    text = category,
-                                    style = MaterialTheme.typography.titleMedium,
-                                    fontSize = 22.sp,
-                                    textAlign = TextAlign.Center,
+                if (showLogin) {
+                    LoginScreen(
+                        onLoginSuccess = { showLogin = false },
+                        onForgotPasswordClick = {
+                            showLogin = false
+                            showForgotPassword = true
+                        },
+                        onCreateAccountClick = {
+                            showLogin = false
+                            showCreateAccount = true
+                        }
+                    )
+                } else if (showForgotPassword) {
+                    ForgotPasswordScreen(
+                        onSubmit = { showForgotPassword = false }
+                    )
+                } else if (showCreateAccount) {
+                    CreateAccountScreen(
+                        onCreateAccountClick = { _, _, _, _ -> showCreateAccount = false },
+                        onAlreadyCustomerClick = {
+                            showCreateAccount = false
+                            showLogin = true
+                        }
+                    )
+                } else {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(16.dp)
+                    ) {
+                        categorizedMenu.forEach { (category, items) ->
+                            Text(
+                                text = category,
+                                style = MaterialTheme.typography.titleLarge,
+                                modifier = Modifier.padding(vertical = 8.dp)
+                            )
+                            items.forEach { itemName ->
+                                val item = menuDetails[itemName] ?: return@forEach
+                                Row(
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .padding(vertical = 8.dp)
-                                )
-                                items.forEach { itemName ->
-                                    val itemDetail = menuDetails[itemName]
-                                    if (itemDetail != null) {
-                                        Row(
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .clickable {
-                                                    selectedItem = itemDetail
-                                                    showItemDetail = true
-                                                }
-                                                .padding(vertical = 10.dp),
-                                            verticalAlignment = Alignment.CenterVertically
-                                        ) {
-                                            Text(
-                                                itemDetail.name,
-                                                style = MaterialTheme.typography.bodyLarge,
-                                                modifier = Modifier.weight(1f)
-                                            )
-                                            Text(
-                                                "£${"%.2f".format(itemDetail.price)}",
-                                                style = MaterialTheme.typography.bodyLarge,
-                                                textAlign = TextAlign.End,
-                                                modifier = Modifier.widthIn(min = 60.dp)
-                                            )
+                                        .clickable {
+                                            selectedItem = item
+                                            showItemDetail = true
                                         }
+                                        .padding(vertical = 8.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Column(
+                                        modifier = Modifier.weight(1f)
+                                    ) {
+                                        Text(
+                                            item.name,
+                                            style = MaterialTheme.typography.bodyLarge
+                                        )
+                                        Text(
+                                            item.description,
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
                                     }
+                                    Spacer(Modifier.width(8.dp))
+                                    Text(
+                                        "£${"%.2f".format(item.price)}",
+                                        style = MaterialTheme.typography.bodyLarge
+                                    )
                                 }
+                                Divider(modifier = Modifier.padding(vertical = 8.dp))
                             }
                         }
-
-                        // Cart button at bottom right
-                        Button(
-                            onClick = { showCart = true },
-                            modifier = Modifier
-                                .align(Alignment.BottomEnd)
-                                .padding(8.dp)
-                        ) {
-                            Icon(Icons.Default.ShoppingCart, contentDescription = "Cart")
-                            Spacer(Modifier.width(8.dp))
-                            Text("Cart (${cart.values.sum()})")
-                        }
-
-                        // Cart modal
-                        if (showCart) {
-                            CartModal(
-                                cart = cart,
-                                menuDetails = menuDetails,
-                                onUpdateCart = { item, newCount ->
-                                    cart = cart.toMutableMap().apply {
-                                        if (newCount > 0) put(item, newCount) else remove(item)
-                                    }
-                                },
-                                onRemoveItem = { item ->
-                                    cart = cart.toMutableMap().apply { remove(item) }
-                                },
-                                onCheckout = { /* Handle checkout */ },
-                                onDismiss = { showCart = false },
-                                sheetState = cartSheetState
-                            )
-                        }
-
-                        // Item detail modal
                         if (showItemDetail && selectedItem != null) {
                             var quantity by remember { mutableStateOf(1) }
                             val item = selectedItem!!
-                            val singlePrice = item.price
-                            val totalPrice = singlePrice * quantity
                             val singleCalories = item.calories
                             val totalCalories = singleCalories * quantity
                             ModalBottomSheet(
@@ -252,63 +191,92 @@ fun MenuScreen(menuDrawerState: DrawerState) {
                                 Column(
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .padding(24.dp),
-                                    horizontalAlignment = Alignment.CenterHorizontally
+                                        .padding(24.dp)
                                 ) {
-                                    Text(item.name, style = MaterialTheme.typography.titleLarge)
-                                    Spacer(Modifier.height(8.dp))
-                                    Text(item.description, style = MaterialTheme.typography.bodyMedium)
-                                    Spacer(Modifier.height(8.dp))
                                     Row(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        horizontalArrangement = Arrangement.SpaceBetween
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        modifier = Modifier.fillMaxWidth()
                                     ) {
-                                        Text("Price (1): £${"%.2f".format(singlePrice)}")
-                                        Text("Calories (1): $singleCalories")
+                                        Text(
+                                            text = item.name,
+                                            style = MaterialTheme.typography.titleLarge,
+                                            modifier = Modifier.weight(1f)
+                                        )
+                                        IconButton(
+                                            onClick = {
+                                                favourites = if (favourites.contains(item.name)) {
+                                                    favourites - item.name
+                                                } else {
+                                                    favourites + item.name
+                                                }
+                                            }
+                                        ) {
+                                            Icon(
+                                                imageVector = if (favourites.contains(item.name)) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
+                                                contentDescription = if (favourites.contains(item.name)) "Unfavourite" else "Favourite"
+                                            )
+                                        }
                                     }
+                                    Spacer(Modifier.height(8.dp))
+                                    Text(
+                                        item.description,
+                                        style = MaterialTheme.typography.bodyMedium
+                                    )
+                                    Spacer(Modifier.height(8.dp))
+                                    Text(
+                                        "Calories: $totalCalories kcal",
+                                        style = MaterialTheme.typography.bodySmall
+                                    )
                                     Spacer(Modifier.height(8.dp))
                                     Row(
                                         verticalAlignment = Alignment.CenterVertically
                                     ) {
-                                        Button(
+                                        Text("Quantity:", style = MaterialTheme.typography.bodyMedium)
+                                        Spacer(Modifier.width(8.dp))
+                                        IconButton(
                                             onClick = { if (quantity > 1) quantity-- },
-                                            enabled = quantity > 1,
-                                            contentPadding = PaddingValues(0.dp)
-                                        ) { Text("-") }
-                                        Text(
-                                            "$quantity",
-                                            modifier = Modifier.padding(horizontal = 16.dp),
-                                            style = MaterialTheme.typography.titleMedium
-                                        )
-                                        Button(
-                                            onClick = { quantity++ },
-                                            contentPadding = PaddingValues(0.dp)
-                                        ) { Text("+") }
-                                    }
-                                    Spacer(Modifier.height(8.dp))
-                                    Divider()
-                                    Spacer(Modifier.height(8.dp))
-                                    Row(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        horizontalArrangement = Arrangement.SpaceBetween
-                                    ) {
-                                        Text("Total Price: £${"%.2f".format(totalPrice)}", style = MaterialTheme.typography.titleMedium)
-                                        Text("Total Calories: $totalCalories", style = MaterialTheme.typography.titleMedium)
+                                            enabled = quantity > 1
+                                        ) {
+                                            Text("-", fontSize = 20.sp)
+                                        }
+                                        Text("$quantity", modifier = Modifier.width(32.dp), textAlign = TextAlign.Center)
+                                        IconButton(
+                                            onClick = { quantity++ }
+                                        ) {
+                                            Text("+", fontSize = 20.sp)
+                                        }
                                     }
                                     Spacer(Modifier.height(16.dp))
                                     Button(
                                         onClick = {
                                             cart = cart.toMutableMap().apply {
-                                                put(item.name, (get(item.name) ?: 0) + quantity)
+                                                put(item.name, (cart[item.name] ?: 0) + quantity)
                                             }
                                             showItemDetail = false
                                         },
                                         modifier = Modifier.fillMaxWidth()
                                     ) {
-                                        Text("Add to Cart")
+                                        Text("Add to Cart - £${"%.2f".format(item.price * quantity)}")
                                     }
                                 }
                             }
+                        }
+                        if (showCart) {
+                            CartModal(
+                                cart = cart,
+                                menuDetails = menuDetails,
+                                onUpdateCart = { item, count ->
+                                    cart = cart.toMutableMap().apply {
+                                        if (count > 0) put(item, count) else remove(item)
+                                    }
+                                },
+                                onRemoveItem = { item ->
+                                    cart = cart.toMutableMap().apply { remove(item) }
+                                },
+                                onCheckout = { showCart = false },
+                                onDismiss = { showCart = false },
+                                sheetState = cartSheetState
+                            )
                         }
                     }
                 }

@@ -90,7 +90,7 @@ fun CartModal(
                                     ) {
                                         Text(item)
                                         Text(
-                                            "Price: \$${"%.2f".format(price)}",
+                                            "Price: £${"%.2f".format(price)}",
                                             style = MaterialTheme.typography.bodySmall
                                         )
                                     }
@@ -118,7 +118,7 @@ fun CartModal(
                                     }
                                     Spacer(Modifier.width(8.dp))
                                     Text(
-                                        "\$${"%.2f".format(subtotal)}",
+                                        "£${"%.2f".format(subtotal)}",
                                         style = MaterialTheme.typography.bodyLarge
                                     )
                                 }
@@ -133,7 +133,7 @@ fun CartModal(
                         horizontalArrangement = Arrangement.End
                     ) {
                         Text(
-                            "Total: \$${"%.2f".format(total)}",
+                            "Total: £${"%.2f".format(total)}",
                             style = MaterialTheme.typography.titleMedium
                         )
                     }
