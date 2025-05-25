@@ -11,6 +11,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.text.style.TextAlign
 
+private fun isEmailValid(email: String): Boolean {
+    val atIndex = email.indexOf('@')
+    val dotIndex = email.lastIndexOf('.')
+    return atIndex > 0 && dotIndex > atIndex + 1 && dotIndex < email.length - 1
+}
+
 @Composable
 fun LoginScreen(
     onLoginClick: (String, String) -> Unit = { _, _ -> },
@@ -19,6 +25,9 @@ fun LoginScreen(
 ) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+
+    val emailValid = isEmailValid(email)
+    val canLogin = email.isNotBlank() && password.isNotBlank() && emailValid
 
     Box(
         modifier = Modifier
@@ -38,6 +47,16 @@ fun LoginScreen(
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth()
             )
+            if (email.isNotEmpty() && !emailValid) {
+                Text(
+                    "Please enter a valid email address.",
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodySmall,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 4.dp)
+                )
+            }
             Spacer(Modifier.height(16.dp))
             OutlinedTextField(
                 value = password,
@@ -61,7 +80,8 @@ fun LoginScreen(
             Spacer(Modifier.height(24.dp))
             Button(
                 onClick = { onLoginClick(email, password) },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                enabled = canLogin
             ) {
                 Text("Login")
             }

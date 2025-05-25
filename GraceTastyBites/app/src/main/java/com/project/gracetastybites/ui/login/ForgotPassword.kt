@@ -7,6 +7,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.graphics.Color
+
+private fun isEmailValid(email: String): Boolean {
+    val atIndex = email.indexOf('@')
+    val dotIndex = email.lastIndexOf('.')
+    return atIndex > 0 && dotIndex > atIndex + 1 && dotIndex < email.length - 1
+}
 
 @Composable
 fun ForgotPasswordScreen(
@@ -14,6 +21,9 @@ fun ForgotPasswordScreen(
 ) {
     var email by remember { mutableStateOf(TextFieldValue("")) }
     var submitted by remember { mutableStateOf(false) }
+
+    val emailValid = isEmailValid(email.text)
+    val canSubmit = email.text.isNotBlank() && emailValid && !submitted
 
     Box(
         modifier = Modifier
@@ -33,6 +43,16 @@ fun ForgotPasswordScreen(
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth()
             )
+            if (email.text.isNotEmpty() && !emailValid) {
+                Text(
+                    "Please enter a valid email address.",
+                    color = Color.Red,
+                    style = MaterialTheme.typography.bodySmall,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 4.dp)
+                )
+            }
             Spacer(Modifier.height(24.dp))
             Button(
                 onClick = {
@@ -40,7 +60,7 @@ fun ForgotPasswordScreen(
                     submitted = true
                 },
                 modifier = Modifier.fillMaxWidth(),
-                enabled = email.text.isNotBlank() && !submitted
+                enabled = canSubmit
             ) {
                 Text("Submit")
             }
