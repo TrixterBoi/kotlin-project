@@ -14,6 +14,7 @@ import androidx.compose.ui.Modifier
 import com.project.gracetastybites.ui.menu.MenuScreen
 import com.project.gracetastybites.ui.orders.OrderHistoryScreen
 import com.project.gracetastybites.ui.account.AccountDetailsScreen
+import com.project.gracetastybites.ui.login.LoginScreen
 import com.project.gracetastybites.ui.theme.GraceTastyBitesTheme
 
 class MainActivity : ComponentActivity() {
@@ -46,7 +47,7 @@ class MainActivity : ComponentActivity() {
                     when (selectedTab) {
                         0 -> MenuScreen(menuDrawerState = menuDrawerState)
                         1 -> OrderHistoryScreen()
-                        2 -> AccountDetailsScreen()
+                        2 -> LoginScreen()
                     }
                 }
             }
