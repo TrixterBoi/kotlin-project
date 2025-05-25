@@ -19,7 +19,6 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        val fabCart = findViewById<FloatingActionButton>(R.id.fabCart)
         val drawerLayout = findViewById<DrawerLayout>(R.id.drawerLayout)
         val navigationView = findViewById<NavigationView>(R.id.navigationView)
         val toolbar = findViewById<androidx.appcompat.widget.Toolbar>(R.id.toolbar)
@@ -51,8 +50,17 @@ class MainActivity : AppCompatActivity() {
         val adapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, foodMenu)
         listViewMenu.adapter = adapter
 
+        val fabCart = findViewById<FloatingActionButton>(R.id.fabCart)
         fabCart.setOnClickListener {
             BottomSheetCart.show(this, cart)
+        }
+
+        val addToCartButton = findViewById<Button>(R.id.addToCartButton)
+        addToCartButton.setOnClickListener {
+            // Option 1: Start CartActivity and pass the item name
+            val intent = Intent(this, CartActivity::class.java)
+            intent.putExtra("itemName", "Pizza")
+            startActivity(intent)
         }
     }
 }
