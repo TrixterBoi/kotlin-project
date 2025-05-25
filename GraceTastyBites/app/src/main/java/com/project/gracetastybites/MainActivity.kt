@@ -174,7 +174,7 @@ fun AdminPanelBottomBar(selectedTab: Int, onTabSelected: (Int) -> Unit) {
         Icons.Default.Home,         // Manage Menu
         Icons.Default.Person        // Manage Employees
     )
-    val labels = listOf("Assign Shifts", "Payroll", "Manage Menu", "Manage Employees")
+    val labels = listOf("Assign Shifts", "Payroll", "Manage Menu", "Employees")
     NavigationBar {
         labels.forEachIndexed { index, label ->
             NavigationBarItem(

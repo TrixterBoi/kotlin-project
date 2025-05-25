@@ -127,7 +127,7 @@ fun LoginScreen(
         Column(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
-                .padding(bottom = 16.dp),
+                .padding(bottom = 100.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             ClickableText(
