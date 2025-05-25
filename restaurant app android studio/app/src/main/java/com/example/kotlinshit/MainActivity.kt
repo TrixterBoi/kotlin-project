@@ -3,6 +3,8 @@ package com.example.kotlinshit
 import android.os.Bundle
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.runtime.Composable
+
 
 
 class MainActivity : AppCompatActivity() {
