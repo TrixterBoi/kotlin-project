@@ -31,7 +31,7 @@ class AppDatabase private constructor(context: Context, dbName: String) {
         @Volatile
         private var INSTANCE: AppDatabase? = null
 
-        fun getInstance(context: Context, dbName: String = "yourfile.db"): AppDatabase {
+        fun getInstance(context: Context, dbName: String = "KotlinDB.db"): AppDatabase {
             return INSTANCE ?: synchronized(this) {
                 val instance = AppDatabase(context.applicationContext, dbName)
                 INSTANCE = instance
