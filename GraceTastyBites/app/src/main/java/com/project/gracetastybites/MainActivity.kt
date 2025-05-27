@@ -69,36 +69,6 @@ class MainActivity : ComponentActivity() {
                     }
                 }
 
-                ModalNavigationDrawer(
-                    drawerState = menuDrawerState,
-                    drawerContent = {
-                        NavDrawer(
-                            drawerItems = drawerItems,
-                            onItemClick = { label ->
-                                when (label) {
-                                    "Employee Panel" -> {
-                                        isEmployeePanel = true
-                                        isAdminPanel = false
-                                        employeeTab = 0
-                                    }
-                                    "Admin Panel" -> {
-                                        isAdminPanel = true
-                                        isEmployeePanel = false
-                                        adminTab = 0
-                                    }
-                                    "Return Home" -> {
-                                        isEmployeePanel = false
-                                        isAdminPanel = false
-                                        selectedTab = 0
-                                    }
-                                }
-                                shouldCloseDrawer = true
-                            },
-                            onLoginClick = { /* not used */ },
-                            drawerState = menuDrawerState
-                        )
-                    }
-                ) {
                     Scaffold(
                         bottomBar = {
                             if (!menuDrawerState.isOpen) {
@@ -163,7 +133,7 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
-}
+//}
 
 // Bottom bars for each panel
 @Composable
