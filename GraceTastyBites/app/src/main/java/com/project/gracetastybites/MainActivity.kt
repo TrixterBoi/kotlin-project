@@ -5,14 +5,11 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Face
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.List
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.ShoppingCart
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import com.project.gracetastybites.data.SessionManager
+import com.project.gracetastybites.data.UserRole
 import com.project.gracetastybites.ui.menu.MenuScreen
 import com.project.gracetastybites.ui.orders.OrderHistoryScreen
 import com.project.gracetastybites.ui.account.AccountDetailsScreen
@@ -33,6 +30,14 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             GraceTastyBitesTheme {
+                // Session state
+                val sessionState = remember { mutableStateOf(SessionManager.userRole) }
+                DisposableEffect(Unit) {
+                    val listener = { sessionState.value = SessionManager.userRole }
+                    SessionManager.addListener(listener)
+                    onDispose { SessionManager.removeListener(listener) }
+                }
+
                 var isEmployeePanel by remember { mutableStateOf(false) }
                 var isAdminPanel by remember { mutableStateOf(false) }
                 var selectedTab by remember { mutableStateOf(0) }
@@ -40,15 +45,20 @@ class MainActivity : ComponentActivity() {
                 var adminTab by remember { mutableStateOf(0) }
                 val menuDrawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
                 var shouldCloseDrawer by remember { mutableStateOf(false) }
+                var showLoginScreen by remember { mutableStateOf(false) }
 
-                // Drawer items
+                // Drawer items based on role
                 val drawerItems = when {
                     isEmployeePanel -> listOf(Triple("Return Home", Icons.Default.Home, "Return Home"))
                     isAdminPanel -> listOf(Triple("Return Home", Icons.Default.Home, "Return Home"))
-                    else -> listOf(
-                        Triple("Employee Panel", Icons.Default.Face, "Employee Management"),
-                        Triple("Admin Panel", Icons.Default.Info, "Admin Management")
-                    )
+                    else -> {
+                        val items = mutableListOf<Triple<String, Any?, String>>()
+                        if (sessionState.value == UserRole.STAFF || sessionState.value == UserRole.ADMIN)
+                            items.add(Triple("Employee Panel", Icons.Default.Face, "Employee Management"))
+                        if (sessionState.value == UserRole.ADMIN)
+                            items.add(Triple("Admin Panel", Icons.Default.Info, "Admin Management"))
+                        items
+                    }
                 }
 
                 // Close drawer after navigation
@@ -95,27 +105,57 @@ class MainActivity : ComponentActivity() {
                                 when {
                                     isEmployeePanel -> EmployeePanelBottomBar(employeeTab) { employeeTab = it }
                                     isAdminPanel -> AdminPanelBottomBar(adminTab) { adminTab = it }
-                                    else -> MainBottomBar(selectedTab) { selectedTab = it }
+                                    else -> MainBottomBar(
+                                        selectedTab = selectedTab,
+                                        onTabSelected = { index ->
+                                            if (index == 2) {
+                                                if (SessionManager.isLoggedIn()) {
+                                                    // Logout
+                                                    SessionManager.logout()
+                                                    isEmployeePanel = false
+                                                    isAdminPanel = false
+                                                    selectedTab = 0
+                                                } else {
+                                                    // Show login
+                                                    showLoginScreen = true
+                                                }
+                                            } else {
+                                                selectedTab = index
+                                            }
+                                        },
+                                        isLoggedIn = SessionManager.isLoggedIn()
+                                    )
                                 }
                             }
                         }
                     ) { innerPadding ->
                         when {
-                            isEmployeePanel -> when (employeeTab) {
+                            isEmployeePanel && (sessionState.value == UserRole.STAFF || sessionState.value == UserRole.ADMIN) -> when (employeeTab) {
                                 0 -> ShiftsScreen(menuDrawerState)
                                 1 -> PayrollScreen(menuDrawerState)
                                 2 -> EmployeeInfoScreen(menuDrawerState)
                             }
-                            isAdminPanel -> when (adminTab) {
+                            isAdminPanel && sessionState.value == UserRole.ADMIN -> when (adminTab) {
                                 0 -> AssignShiftsScreen(menuDrawerState)
                                 1 -> AdminPayrollScreen(menuDrawerState)
                                 2 -> ManageMenuScreen(menuDrawerState)
                                 3 -> ManageEmployeesScreen(menuDrawerState)
                             }
-                            else -> when (selectedTab) {
-                                0 -> MenuScreen(menuDrawerState = menuDrawerState)
-                                1 -> OrderHistoryScreen()
-                                2 -> LoginScreen()
+                            else -> {
+                                if (showLoginScreen) {
+                                    LoginScreen(
+                                        onLoginSuccess = {
+                                            showLoginScreen = false
+                                            // Optionally, navigate to a different tab/panel after login
+                                        }
+                                    )
+                                } else {
+                                    when (selectedTab) {
+                                        0 -> MenuScreen(menuDrawerState = menuDrawerState)
+                                        1 -> OrderHistoryScreen()
+                                        2 -> {} // Handled by showLoginScreen
+                                    }
+                                }
                             }
                         }
                     }
@@ -127,13 +167,13 @@ class MainActivity : ComponentActivity() {
 
 // Bottom bars for each panel
 @Composable
-fun MainBottomBar(selectedTab: Int, onTabSelected: (Int) -> Unit) {
+fun MainBottomBar(selectedTab: Int, onTabSelected: (Int) -> Unit, isLoggedIn: Boolean) {
     val icons = listOf(
         Icons.Default.Home,          // Menu
         Icons.Default.List,          // Orders
-        Icons.Default.Person         // Login
+        if (isLoggedIn) Icons.Default.Person else Icons.Default.Person // Login/Logout
     )
-    val labels = listOf("Menu", "Orders", "Login")
+    val labels = listOf("Menu", "Orders", if (isLoggedIn) "Logout" else "Login")
     NavigationBar {
         labels.forEachIndexed { index, label ->
             NavigationBarItem(
@@ -149,9 +189,9 @@ fun MainBottomBar(selectedTab: Int, onTabSelected: (Int) -> Unit) {
 @Composable
 fun EmployeePanelBottomBar(selectedTab: Int, onTabSelected: (Int) -> Unit) {
     val icons = listOf(
-        Icons.Default.List,          // Shifts
-        Icons.Default.ShoppingCart,  // Payroll
-        Icons.Default.Info           // Info
+        Icons.Default.List,            // Shifts (alternative to Schedule)
+        Icons.Default.ShoppingCart,  // Payroll (alternative to AttachMoney)
+        Icons.Default.Info             // Info
     )
     val labels = listOf("Shifts", "Payroll", "Info")
     NavigationBar {
@@ -169,12 +209,12 @@ fun EmployeePanelBottomBar(selectedTab: Int, onTabSelected: (Int) -> Unit) {
 @Composable
 fun AdminPanelBottomBar(selectedTab: Int, onTabSelected: (Int) -> Unit) {
     val icons = listOf(
-        Icons.Default.List,         // Assign Shifts
+        Icons.Default.List,           // Assign Shifts
         Icons.Default.ShoppingCart, // Payroll
-        Icons.Default.Home,         // Manage Menu
-        Icons.Default.Person        // Manage Employees
+        Icons.Default.Home,       // Manage Menu (alternative to RestaurantMenu)
+        Icons.Default.Person          // Manage Employees (alternative to Group)
     )
-    val labels = listOf("Assign Shifts", "Payroll", "Manage Menu", "Employees")
+    val labels = listOf("Assign Shifts", "Payroll", "Menu", "Employees")
     NavigationBar {
         labels.forEachIndexed { index, label ->
             NavigationBarItem(

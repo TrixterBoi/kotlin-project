@@ -26,6 +26,7 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.project.gracetastybites.data.SessionManager
 import com.project.gracetastybites.data.db.AppDatabase
 import com.project.gracetastybites.data.db.authenticateStaff
 
@@ -104,6 +105,7 @@ fun LoginScreen(
                     val staff = authenticateStaff(appDatabase.database, email, password)
                     if (staff != null) {
                         errorMessage = null
+                        SessionManager.login(staff)
                         onLoginSuccess()
                     } else {
                         errorMessage = "Login failed: Invalid email or password."
